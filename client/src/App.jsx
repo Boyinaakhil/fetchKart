@@ -31,8 +31,10 @@ import PaymentSuccessPage from "./pages/shopping-view/payment-success";
 function App() {
   const { isAuthenticated, user, isLoading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+
   useEffect(() => {
-    dispatch(checkAuth()); 
+    const token = JSON.parse(sessionStorage.getItem('token'));
+    dispatch(checkAuth(token)); 
   }
   , [dispatch]);
   if (isLoading) {

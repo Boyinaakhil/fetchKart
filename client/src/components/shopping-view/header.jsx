@@ -14,7 +14,7 @@ import { DropdownMenuSeparator } from '../ui/dropdown-menu'
 import { DropdownMenuItem } from '../ui/dropdown-menu'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { logoutUser } from '@/store/auth-slice'
+import { logoutUser, resetTokenAndCredentials } from '@/store/auth-slice'
 import UserCartWrapper from './cart-wrapper.jsx';
 import { fetchCartItems } from '@/store/shop/cart-slice'
 import { useEffect } from 'react'
@@ -61,7 +61,10 @@ function HeadersRightContent(){
   const dispatch = useDispatch();
 
   function handleLogout() {
-    dispatch(logoutUser())
+    // dispatch(logoutUser())
+    dispatch(resetTokenAndCredentials());
+    sessionStorage.clear();
+    navigate('/auth/login');
   }
   useEffect(() => {
     dispatch(fetchCartItems(user?.id))

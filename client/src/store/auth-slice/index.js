@@ -5,7 +5,8 @@ import axios from 'axios';
 const initialState = {
   isAuthenticated: false,
   isLoading : true,
-  user: null
+  user: null,
+  token : null,
 }
 
 export const registerUser = createAsyncThunk('auth/register',
@@ -38,12 +39,30 @@ export const logoutUser = createAsyncThunk('auth/logout',
     return response.data;
   }
 )
+// )
+// export const checkAuth = createAsyncThunk('auth/checkAuth',
+//   async() =>{
+//     const response = await axios.get(
+//       `${import.meta.env.VITE_API_URL}/api/auth/user`,
+//       {withCredentials: true,
+//        headers: {
+//         'Content-Type': 'application/json',
+//         'Accept': 'application/json',
+//         'Cache-Control': 'no-cache',
+//         Expires : '0',
+//       }
+//     }
+//     );
+//     return response.data;
+//   }
+// )
 export const checkAuth = createAsyncThunk('auth/checkAuth',
-  async() =>{
+  async(token) =>{
     const response = await axios.get(
       `${import.meta.env.VITE_API_URL}/api/auth/user`,
-      {withCredentials: true,
+      {
        headers: {
+        'Authorization': `Bearer ${token}`, // Include the token in the Authorization header
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Cache-Control': 'no-cache',
@@ -60,6 +79,11 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUsers: (state, action) => {
+    },
+    resetTokenAndCredentials: (state) => {
+      state.token = null; // Reset token to null
+      state.user = null; // Reset user to null
+      state.isAuthenticated = false; // Reset authentication status
     }
   },
   extraReducers:(builder)=>{
@@ -85,11 +109,14 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.success ?  action.payload.user : null;
         state.isAuthenticated = action.payload.success ? true : false;
+        state.token = action.payload.success ? action.payload.token : null;
+        sessionStorage.setItem('token', JSON.stringify(action.payload.token)); // Store token in session storage
       }).addCase(loginUser.rejected,(state,action)=>
         {
           state.isLoading = false;
           state.user = null;
           state.isAuthenticated = false;
+          state.token = null;
           console.error("Registration Error:", action.error.message);  // Log error
         alert("Registration failed. Please try again.");  // Show alert to user
         })
@@ -119,5 +146,5 @@ const authSlice = createSlice({
 });
 
 
-export const {setUsers} = authSlice.actions;
+export const {setUsers, resetTokenAndCredentials} = authSlice.actions;
 export default authSlice.reducer;
