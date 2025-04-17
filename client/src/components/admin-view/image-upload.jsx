@@ -7,25 +7,20 @@ import axios from "axios";
 import { Skeleton } from "../ui/skeleton";
 
 function ProductImageUpload({
-  imageFile,
-  setImageFile,
+  file, // ✅ renamed to match AdminProducts prop
+  setFile, // ✅ renamed to match AdminProducts prop
+  uploadedImage, // ✅ renamed to match AdminProducts prop
+  setUploadedImage, // ✅ renamed to match AdminProducts prop
   imageLoadingState,
-  uploadedImageUrl,
-  setUploadedImageUrl,
   setImageLoadingState,
   isEditMode,
   isCustomStyling = false,
 }) {
   const inputRef = useRef(null);
 
-  console.log(isEditMode, "isEditMode");
-
   function handleImageFileChange(event) {
-    console.log(event.target.files, "event.target.files");
     const selectedFile = event.target.files?.[0];
-    console.log(selectedFile);
-
-    if (selectedFile) setImageFile(selectedFile);
+    if (selectedFile) setFile(selectedFile); // ✅ using correct prop
   }
 
   function handleDragOver(event) {
@@ -35,11 +30,11 @@ function ProductImageUpload({
   function handleDrop(event) {
     event.preventDefault();
     const droppedFile = event.dataTransfer.files?.[0];
-    if (droppedFile) setImageFile(droppedFile);
+    if (droppedFile) setFile(droppedFile); // ✅ using correct prop
   }
 
   function handleRemoveImage() {
-    setImageFile(null);
+    setFile(null); // ✅ using correct prop
     if (inputRef.current) {
       inputRef.current.value = "";
     }
@@ -48,34 +43,28 @@ function ProductImageUpload({
   async function uploadImageToCloudinary() {
     setImageLoadingState(true);
     const data = new FormData();
-    data.append("my_file", imageFile);
+    data.append("my_file", file); // ✅ using correct prop
     const response = await axios.post(
       `${import.meta.env.VITE_API_URL}/api/admin/products/upload-image`,
       data
     );
-    console.log(response, "response");
-
     if (response?.data?.success) {
-      setUploadedImageUrl(response.data.result.url);
-      setImageLoadingState(false);
+      setUploadedImage(response.data.result.url); // ✅ using correct prop
     }
+    setImageLoadingState(false);
   }
 
   useEffect(() => {
-    if (imageFile !== null) uploadImageToCloudinary();
-  }, [imageFile]);
+    if (file !== null) uploadImageToCloudinary();
+  }, [file]);
 
   return (
-    <div
-      className={`w-full  mt-4 ${isCustomStyling ? "" : "max-w-md mx-auto"}`}
-    >
+    <div className={`w-full mt-4 ${isCustomStyling ? "" : "max-w-md mx-auto"}`}>
       <Label className="text-lg font-semibold mb-2 block">Upload Image</Label>
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className={`${
-          isEditMode ? "opacity-60" : ""
-        } border-2 border-dashed rounded-lg p-4`}
+        className={`${isEditMode ? "opacity-60" : ""} border-2 border-dashed rounded-lg p-4`}
       >
         <Input
           id="image-upload"
@@ -85,7 +74,7 @@ function ProductImageUpload({
           onChange={handleImageFileChange}
           disabled={isEditMode}
         />
-        {!imageFile ? (
+        {!file ? (
           <Label
             htmlFor="image-upload"
             className={`${
@@ -102,7 +91,7 @@ function ProductImageUpload({
             <div className="flex items-center">
               <FileIcon className="w-8 text-primary mr-2 h-8" />
             </div>
-            <p className="text-sm font-medium">{imageFile.name}</p>
+            <p className="text-sm font-medium">{file.name}</p>
             <Button
               variant="ghost"
               size="icon"
